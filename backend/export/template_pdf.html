@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Laporan Transaksi</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>Laporan Transaksi</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Tanggal Transaksi</th>
+                <th>Project</th>
+                <th>Type Produk</th>
+                <th>Batch Number</th>
+                <th>Quantitas</th>
+                <th>Merek</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each transactions}}
+            <tr>
+                <td>{{@index}}</td>
+                <td>{{transaction_date}}</td>
+                <td>{{project}}</td>
+                <td>{{type}}</td>
+                <td>{{batch_number}}</td>
+                <td>{{current_quantity}}</td>
+                <td>{{manufacture_brand}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</body>
+</html>
