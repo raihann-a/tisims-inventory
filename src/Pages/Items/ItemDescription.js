@@ -11,7 +11,7 @@ const ItemDescription = () => {
   useEffect(() => {
     const fetchItemData = async () => {
       try {
-        const response = await axios.get(`/api/items/${id}`);
+        const response = await axios.get(`http://localhost:3001/api/items/${id}`);
         setItemData(response.data);
       } catch (err) {
         setError(err.message);
@@ -31,11 +31,11 @@ const ItemDescription = () => {
     <div className="flex justify-center items-center min-h-screen">
       <div className="max-w-2xl p-6 bg-white rounded-lg shadow-lg">
         <div className="flex justify-center">
-          <img src={itemData.imageUrl} alt="Item" className="w-full h-auto mb-4 rounded object-cover object-left" />
+          <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" alt="Item" className="w-full h-auto mb-4 rounded object-cover object-left" />
         </div>
         <div>
           <p className="text-red-600"><strong>Category:</strong> <span className="text-black">{itemData.category}</span></p>
-          <p className="text-red-600"><strong>Part Number:</strong> <span className="text-black">{itemData.bacth_number}</span></p>
+          <p className="text-red-600"><strong>Part Number:</strong> <span className="text-black">{itemData.batch_number}</span></p>
           <p className="text-red-600"><strong>Brand:</strong> <span className="text-black">{itemData.manufacture_brand}</span></p>
           <p className="text-red-600"><strong>Initial Quantity:</strong> <span className="text-black">{itemData.initial_quantity}</span></p>
           <p className="text-red-600"><strong>Description:</strong> <span className="text-black">{itemData.description}</span></p>

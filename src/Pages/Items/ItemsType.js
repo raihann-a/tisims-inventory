@@ -19,7 +19,7 @@ const ItemsType = () => {
   useEffect(() => {
     const fetchTypes = async () => {
       try {
-        const response = await axios.get('/api/types'); // Memanggil endpoint API
+        const response = await axios.get('http://localhost:3001/api/types');
         setTypes(response.data);
         setFilteredTypes(response.data);
       } catch (error) {
