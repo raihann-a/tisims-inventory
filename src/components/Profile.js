@@ -1,24 +1,31 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook for navigation
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
   const [showMenu, setShowMenu] = useState(false);
+  const [username, setUsername] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    if (userData) {
+      setUsername(userData.username);
+    }
+  }, []);
 
   const handleLogout = () => {
     console.log("Logging out...");
-    // Logic to handle logout here, like clearing user session data
-    navigate('/'); // Redirect to login after logout
+    localStorage.removeItem('user'); 
+    navigate('/'); 
   };
 
   return (
     <div className="relative w-full max-w-xs p-4 bg-white rounded-lg shadow-md">
       <div className="flex items-center justify-between space-x-3 cursor-pointer" onClick={() => setShowMenu(!showMenu)}>
         <img src="logo192.png" alt="Profile" className="w-10 h-10 rounded-full" />
-        <span className="flex-grow font-semibold">Admin</span>
+        <span className="flex-grow font-semibold">{username || 'User'}</span> {/* Menampilkan username */}
         <div className="flex-shrink-0">
           <button className="text-gray-500 hover:text-gray-700">
-            {/* Icon or button to indicate dropdown */}
             {showMenu ? '▲' : '▼'}
           </button>
         </div>

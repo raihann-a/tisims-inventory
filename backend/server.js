@@ -2,7 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
 import mysql from 'mysql2/promise';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 import { getItemsData, insertItemData, getBarangMasukData, getBarangKeluarData, updateItemData, deleteItemData, getLaporanMasukData, getLaporanKeluarData, getLaporanData, insertBarangMasuk, insertBarangKeluar } from './config/koneksi.js';
+
+const secretKey = 'yourSecretKey';
 
 const pool = mysql.createPool({
   host: process.env.DB_HOST,
@@ -19,6 +23,74 @@ const router = express.Router();
 
 app.use(cors());
 app.use(bodyParser.json());
+
+app.post('/api/register', async (req, res) => {
+  const { username, email, password } = req.body;
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const [result] = await pool.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, hashedPassword]);
+    res.status(201).json({ message: 'User registered successfully', userId: result.insertId });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const [rows] = await pool.query('SELECT * FROM users WHERE email = ?', [email]);
+    if (rows.length > 0) {
+      const user = rows[0];
+      const match = await bcrypt.compare(password, user.password);
+      if (match) {
+        const token = jwt.sign({ userId: user.id }, secretKey, { expiresIn: '1h' });
+        res.json({ message: 'Login successful', token });
+      } else {
+        res.status(401).json({ message: 'Invalid credentials' });
+      }
+    } else {
+      res.status(401).json({ message: 'Invalid credentials' });
+    }
+  } catch (error) {
+    console.error('Error logging in user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
+app.post('/api/updateUser', async (req, res) => {
+  const { userId, username, email, oldPassword, newPassword } = req.body;
+
+  try {
+    // Ambil data pengguna dari database
+    const [rows] = await pool.query('SELECT * FROM users WHERE id = ?', [userId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const user = rows[0];
+
+    // Verifikasi oldPassword
+    const match = await bcrypt.compare(oldPassword, user.password);
+    if (!match) {
+      return res.status(401).json({ message: 'Invalid old password' });
+    }
+
+    // Hash newPassword
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    // Perbarui data pengguna di database
+    await pool.query(
+      'UPDATE users SET username = ?, email = ?, password = ? WHERE id = ?',
+      [username, email, hashedPassword, userId]
+    );
+
+    res.status(200).json({ message: 'User updated successfully' });
+  } catch (error) {
+    console.error('Error updating user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+});
 
 router.get('/api/types', async (req, res) => {
   try {
@@ -80,10 +152,10 @@ app.put('/items/:id_produk', async (req, res) => {
     res.status(500).json({ message: 'Gagal memperbarui item' });
   }
 });
-app.delete('/items/:id_produk', async (req, res) => {
-  const { id_produk } = req.params;
+app.delete('/items/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const data = await deleteItemData(id_produk);
+    const data = await deleteItemData(id);
     const result = data.affectedRows;
     if (result.affectedRows > 0) {
       res.status(200).send('Item deleted successfully');

@@ -15,9 +15,9 @@ const fetchItemsData = async () => {
     console.error('Error fetching data:', error);
   }
 };
-const deleteItem = async (id_produk) => {
+const deleteItem = async (id) => {
   try {
-    const response = await fetch(`http://localhost:3001/items/${id_produk}`, {
+    const response = await fetch(`http://localhost:3001/items/${id}`, {
       method: 'DELETE',
     });
     if (!response.ok) {
@@ -53,9 +53,13 @@ const ItemsData = () => {
     item.batch_number.toLowerCase().includes(filter.toLowerCase()) || 
     item.manufacture_brand.toLowerCase().includes(filter.toLowerCase())
   ).slice(0, itemsToShow);
-  const handleDelete = async (id_produk) => {
-    await deleteItem(id_produk);
-    fetchItemsData().then(data => setItems(data || []));
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm('Apakah Anda yakin ingin menghapus data ini?');
+    
+    if (confirmed) {
+      await deleteItem(id);
+      fetchItemsData().then(data => setItems(data || []));
+    }
   };
 
   return (
@@ -93,6 +97,7 @@ const ItemsData = () => {
             <tr>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">No</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Part Number</th>
+              <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Type</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Category</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Manufacture</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Current Stock</th>
@@ -104,6 +109,7 @@ const ItemsData = () => {
               <tr key={item.id} className="hover:bg-gray-100">
                 <td className="text-left py-3 px-4">{index + 1}</td>
                 <td className="text-left py-3 px-4">{item.batch_number}</td>
+                <td className="text-left py-3 px-4">{item.type}</td>
                 <td className="text-left py-3 px-4">{item.category}</td>
                 <td className="text-left py-3 px-4">{item.manufacture_brand}</td>
                 <td className="text-left py-3 px-4">{item.current_quantity}</td>
@@ -118,7 +124,7 @@ const ItemsData = () => {
                   <button className="text-black-500 hover:text-red-500 px-4 py-2 rounded transition duration-150 ease-in-out" title="Edit Item">
                     <FaEdit />
                   </button>
-                  <button onClick={() => handleDelete(item.id_produk)} 
+                  <button onClick={() => handleDelete(item.id)} 
                     className="text-red-500 hover:text-red-800 mr-2" 
                     title="Delete Item">
                     <FaTrashAlt />

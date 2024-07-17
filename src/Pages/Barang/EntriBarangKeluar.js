@@ -5,8 +5,9 @@ const EntriBarangKeluar = () => {
   const [formData, setFormData] = useState({
     products_id: '',
     amount: '',
-    project:'',
-    transaction_date: ''
+    project: '',
+    transaction_date: '',
+    sebagai: ''
   });
   const [products, setProducts] = useState([]);
 
@@ -118,6 +119,20 @@ const EntriBarangKeluar = () => {
             onChange={handleChange} 
             className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none" 
           />
+        </div>
+        <div className="mb-4">
+          <label htmlFor="sebagai" className="block text-sm font-medium text-gray-700">Sebagai:</label>
+          <select
+            name="sebagai"
+            id="sebagai"
+            value={formData.sebagai}
+            onChange={handleChange}
+            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none"
+          >
+            <option value="">Pilih Salah Satu</option>
+            <option value="Staff">Staff</option>
+            <option value="Supplier">Supplier</option>
+          </select>
         </div>
         <button type="submit" className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">Submit</button>
       </form>

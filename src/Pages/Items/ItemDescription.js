@@ -31,7 +31,7 @@ const ItemDescription = () => {
     <div className="flex justify-center items-center min-h-screen">
       <div className="max-w-2xl p-6 bg-white rounded-lg shadow-lg">
         <div className="flex justify-center">
-          <img src="https://images.unsplash.com/photo-1587829741301-dc798b83add3?ixlib=rb-1.2.1&auto=format&fit=crop&w=400&q=60" alt="Item" className="w-full h-auto mb-4 rounded object-cover object-left" />
+          <img src="https://cdn0-production-images-kly.akamaized.net/C3zk9jKSpft7lkLXAKjI_IcxS0I=/1280x720/smart/filters:quality(75):strip_icc():format(webp)/kly-media-production/medias/2960800/original/074822100_1573106818-Capacitors__7189597135_.jpg" alt="Item" className="w-full h-auto mb-4 rounded object-cover object-left" />
         </div>
         <div>
           <p className="text-red-600"><strong>Category:</strong> <span className="text-black">{itemData.category}</span></p>

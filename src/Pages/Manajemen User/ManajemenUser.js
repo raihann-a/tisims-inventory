@@ -1,23 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function ManajemenUser() {
   const [user, setUser] = useState({
-    name: '',
     email: '',
-    Password: ''
+    oldPassword: '',
+    newPassword: '',
+    username: '',
   });
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      const parsedUser = JSON.parse(storedUser);
+      setUser((prev) => ({
+        ...prev,
+        email: parsedUser.email || '',
+        username: parsedUser.username || '',
+      }));
+    }
+  }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setUser({ ...user, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form Data:", user);
-    navigate('/dashboard');
+
+    const storedUser = localStorage.getItem('currentUser');
+    const currentUser = storedUser ? JSON.parse(storedUser) : null;
+
+    if (!currentUser || !currentUser.id) {
+      console.error('User not found or invalid user data.');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/updateUser', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: currentUser.id,
+          username: user.username,
+          email: user.email,
+          oldPassword: user.oldPassword,
+          newPassword: user.newPassword,
+        }),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        alert(data.message);
+        navigate('/dashboard');
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert('An error occurred. Please try again.');
+    }
   };
 
   return (
@@ -25,9 +69,10 @@ function ManajemenUser() {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
         <h1 className="text-xl font-semibold text-gray-900">User Management Settings</h1>
         <form onSubmit={handleSubmit} className="space-y-6">
-          <InputField label="Name" name="name" value={user.name} onChange={handleChange} />
           <InputField label="Email" type="email" name="email" value={user.email} onChange={handleChange} />
-          <PasswordInput label="Password" name="Password" value={user.Password} onChange={handleChange} />
+          <InputField label="Username" name="username" value={user.username} onChange={handleChange} />
+          <PasswordInput label="Old Password" name="oldPassword" value={user.oldPassword} onChange={handleChange} />
+          <PasswordInput label="New Password" name="newPassword" value={user.newPassword} onChange={handleChange} />
           <button type="submit" className="w-full bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
             Save Changes
           </button>

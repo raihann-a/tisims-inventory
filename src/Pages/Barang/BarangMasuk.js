@@ -46,6 +46,7 @@ const BarangMasuk = () => {
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Product ID</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Project</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Type</th>
+              <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Sebagai</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Tanggal Masuk</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Stock Masuk</th>
               <th className="text-left py-3 px-4 uppercase font-semibold text-sm">Stok Sekarang</th>
@@ -59,6 +60,7 @@ const BarangMasuk = () => {
                 <td className="text-left py-3 px-4">{item.products_id}</td>
                 <td className="text-left py-3 px-4">{item.project}</td>
                 <td className="text-left py-3 px-4">{item.type}</td>
+                <td className="text-left py-3 px-4">{item.sebagai}</td>
                 <td className="text-left py-3 px-4">{formatDate(item.transaction_date)}</td>
                 <td className="text-left py-3 px-4">{item.amount}</td>
                 <td className="text-left py-3 px-4">{item.total_stock}</td>

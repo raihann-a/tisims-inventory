@@ -1,8 +1,12 @@
 import React from 'react';
+const formatDate = (isoDateString) => {
+  const date = new Date(isoDateString);
+  return date.toLocaleDateString('en-GB'); // Contoh format: 'DD/MM/YYYY'
+};
 
 const Table = ({ data }) => {
-  // Pastikan data adalah array
   const tableData = Array.isArray(data) ? data : [];
+  
 
   return (
     <div className="overflow-x-auto">
@@ -22,7 +26,7 @@ const Table = ({ data }) => {
             <tr key={index} className="border-b">
               <td className="px-6 py-4">{index + 1}</td>
               <td className="px-6 py-4">{item.id}</td>
-              <td className="px-6 py-4">{item.transaction_date}</td>
+              <td className="px-6 py-4">{formatDate(item.transaction_date)}</td>
               <td className="px-6 py-4">{item.type}</td>
               <td className="px-6 py-4">{item.amount}</td>
               <td className="px-6 py-4">{item.total_stock}</td>

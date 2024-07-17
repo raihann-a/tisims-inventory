@@ -1,10 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { FaFilePdf, FaFileExcel } from 'react-icons/fa'; 
+import { FaFilePdf, FaFileExcel } from 'react-icons/fa';
+import jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
 const LaporanBarangMasuk = () => {
     const [data, setData] = useState([]);
     const [itemsToShow, setItemsToShow] = useState(10);
     const [dateRange, setDateRange] = useState({ start: '', end: '' });
+    const [selectedType, setSelectedType] = useState('');
+    const [types, setTypes] = useState([]);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -12,6 +17,9 @@ const LaporanBarangMasuk = () => {
                 const response = await fetch('http://localhost:3001/api/laporan-masuk');
                 const result = await response.json();
                 setData(result);
+
+                const uniqueTypes = [...new Set(result.map(item => item.type))];
+                setTypes(uniqueTypes);
             } catch (error) {
                 console.error('Error fetching laporan masuk data:', error);
             }
@@ -19,12 +27,64 @@ const LaporanBarangMasuk = () => {
 
         fetchData();
     }, []);
+
     const formatDate = (isoDateString) => {
         const date = new Date(isoDateString);
         return date.toLocaleDateString('en-GB'); // Contoh format: 'DD/MM/YYYY'
-      };
+    };
+
     const handleDateChange = (e) => {
         setDateRange({ ...dateRange, [e.target.name]: e.target.value });
+    };
+
+    const handleTypeChange = (e) => {
+        setSelectedType(e.target.value);
+    };
+
+    const filteredData = selectedType 
+        ? data.filter(item => item.type === selectedType) 
+        : data;
+
+    const handleExportPDF = () => {
+        const doc = new jsPDF();
+        const tableColumn = ["No", "Tanggal", "Sebagai", "Project", "Type", "Part Number", "Manufacture", "Barang Masuk"];
+        const tableRows = [];
+
+        filteredData.slice(0, itemsToShow).forEach((item, index) => {
+            const itemData = [
+                index + 1,
+                formatDate(item.transaction_date),
+                item.sebagai,
+                item.project,
+                item.type,
+                item.batch_number,
+                item.manufacture_brand,
+                item.amount
+            ];
+            tableRows.push(itemData);
+        });
+
+        doc.autoTable(tableColumn, tableRows, { startY: 20 });
+        doc.text("Laporan Barang Masuk", 14, 15);
+        doc.save(`laporan_barang_masuk_${new Date().toISOString()}.pdf`);
+    };
+
+    const handleExportExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(
+            filteredData.slice(0, itemsToShow).map((item, index) => ({
+                No: index + 1,
+                Tanggal: formatDate(item.transaction_date),
+                Sebagai: item.sebagai,
+                Project: item.project,
+                Type: item.type,
+                "Part Number": item.batch_number,
+                Manufacture: item.manufacture_brand,
+                "Barang Masuk": item.amount
+            }))
+        );
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "Laporan Barang Masuk");
+        XLSX.writeFile(wb, `laporan_barang_masuk_${new Date().toISOString()}.xlsx`);
     };
 
     return (
@@ -40,12 +100,18 @@ const LaporanBarangMasuk = () => {
                     </select>
                     <input type="date" name="start" value={dateRange.start} onChange={handleDateChange} className="border border-gray-300 rounded py-1 px-2 ml-2" />
                     <input type="date" name="end" value={dateRange.end} onChange={handleDateChange} className="border border-gray-300 rounded py-1 px-2 ml-2" />
+                    <select value={selectedType} onChange={handleTypeChange} className="border border-gray-300 rounded py-1 px-2 ml-2">
+                        <option value="">All Types</option>
+                        {types.map((type, index) => (
+                            <option key={index} value={type}>{type}</option>
+                        ))}
+                    </select>
                 </div>
                 <div className="flex items-center space-x-2">
-                    <button onClick={() => {}} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                    <button onClick={handleExportPDF} className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded flex items-center">
                         <FaFilePdf className="mr-2" /> Cetak PDF
                     </button>
-                    <button onClick={() => {}} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
+                    <button onClick={handleExportExcel} className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded flex items-center">
                         <FaFileExcel className="mr-2" /> Export Excel
                     </button>
                 </div>
@@ -56,6 +122,7 @@ const LaporanBarangMasuk = () => {
                         <tr>
                             <th className="px-4 py-3 uppercase font-semibold text-sm">No</th>
                             <th className="px-4 py-3 uppercase font-semibold text-sm">Tanggal</th>
+                            <th className="px-4 py-3 uppercase font-semibold text-sm">Sebagai</th>
                             <th className="px-4 py-3 uppercase font-semibold text-sm">Project</th>
                             <th className="px-4 py-3 uppercase font-semibold text-sm">Type</th>
                             <th className="px-4 py-3 uppercase font-semibold text-sm">Part Number</th>
@@ -64,10 +131,11 @@ const LaporanBarangMasuk = () => {
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                        {data.slice(0, itemsToShow).map((item, index) => (
+                        {filteredData.slice(0, itemsToShow).map((item, index) => (
                             <tr key={index} className="hover:bg-gray-100">
                                 <td className="px-4 py-3">{index + 1}</td>
                                 <td className="px-4 py-3">{formatDate(item.transaction_date)}</td>
+                                <td className="px-4 py-3">{item.sebagai}</td>
                                 <td className="px-4 py-3">{item.project}</td>
                                 <td className="px-4 py-3">{item.type}</td>
                                 <td className="px-4 py-3">{item.batch_number}</td>

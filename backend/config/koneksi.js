@@ -50,7 +50,7 @@ export async function insertItemData(newItem) {
     const { batch_number, manufacture_brand, category, type, current_quantity } = newItem;
     const result = await pool.query(
       'INSERT INTO products (batch_number, manufacture_brand, category, type, current_quantity, initial_quantity, loss_stock, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
-      [batch_number, manufacture_brand, category, type, current_quantity, current_quantity, 0, description ]
+      [batch_number, manufacture_brand, category, type, current_quantity, current_quantity, 0, "-" ]
     );
     return result;
   } catch (error) {
@@ -137,7 +137,7 @@ export async function insertBarangMasuk(newTransaction) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    const { products_id, amount, project, transaction_date } = newTransaction;
+    const { products_id, amount, project, transaction_date, sebagai } = newTransaction;
     const currentTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     console.log('Received data:', newTransaction);
@@ -152,9 +152,9 @@ export async function insertBarangMasuk(newTransaction) {
     console.log('Total stock calculated:', totalStock);
 
     const [insertResult] = await connection.query(
-      `INSERT INTO transactions (products_id, project, amount, total_stock, transaction_date, transaction_type, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [products_id, project, amount, totalStock, transaction_date, 'in', currentTimestamp, currentTimestamp]
+      `INSERT INTO transactions (products_id, project, amount, total_stock, transaction_date, transaction_type, sebagai, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [products_id, project, amount, totalStock, transaction_date, 'in', sebagai, currentTimestamp, currentTimestamp]
     );
 
     console.log('Insert result:', insertResult);
@@ -178,7 +178,7 @@ export async function insertBarangKeluar(newTransaction) {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    const { products_id, amount, project, transaction_date } = newTransaction;
+    const { products_id, amount, project, transaction_date, sebagai } = newTransaction;
     const currentTimestamp = new Date().toISOString().slice(0, 19).replace('T', ' ');
 
     console.log('Received data:', newTransaction);
@@ -202,9 +202,9 @@ export async function insertBarangKeluar(newTransaction) {
     console.log('Total stock calculated:', totalStock);
 
     const [insertResult] = await connection.query(
-      `INSERT INTO transactions (products_id, amount, project, total_stock, transaction_date, transaction_type, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [products_id, amount, project, totalStock, transaction_date, 'out', currentTimestamp, currentTimestamp]
+      `INSERT INTO transactions (products_id, amount, project, total_stock, transaction_date, transaction_type, sebagai, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [products_id, amount, project, totalStock, transaction_date, 'out', sebagai, currentTimestamp, currentTimestamp]
     );
 
     console.log('Insert result:', insertResult);
